@@ -1,0 +1,39 @@
+#!/bin/sh
+# Strip ANSI color codes from input
+
+show_help() {
+    echo "Usage: $0 [OPTION]..."
+    echo "Strip ANSI color codes from input."
+    echo ""
+    echo "  -h, --help    Display this help message and exit."
+    echo "  -f, --follow  Follow the input, useful with tail -f or tail -F."
+    echo ""
+}
+
+strip_ansi_codes() {
+    sed "s,\x1B\[[0-9;]*[a-zA-Z],,g"
+}
+
+case "$1" in
+    --help|-h)
+        show_help
+        ;;
+
+    --follow|-f)
+        # Loop sed to process input
+        while IFS= read -r line; do
+            echo "$line" | strip_ansi_codes
+        done
+        ;;
+
+    *)
+        # Check if standard input is a terminal
+        if [ -t 0 ]; then
+            echo "Error: No input provided." >&2
+            show_help
+            exit 1
+        fi
+
+        strip_ansi_codes
+        ;;
+esac
